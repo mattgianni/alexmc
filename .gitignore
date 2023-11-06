@@ -1,0 +1,22 @@
+# Maven target directory
+target/
+
+# IDE files
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# Compiled class file
+*.class
+
+# Log files
+*.log
+
+# Maven build files
+mvnw
+mvnw.cmd
+
+# AlexMC specifc files to ignore
+grabs/
