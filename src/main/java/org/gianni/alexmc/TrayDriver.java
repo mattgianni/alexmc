@@ -9,6 +9,7 @@ public class TrayDriver {
 
 	public static void main(String[] args) {
 		logger.debug("starting application");
+		bug
 		TrayItem.factory();
 	}
 
