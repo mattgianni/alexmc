@@ -37,7 +37,7 @@ public class TrayItem {
 			SystemTray tray = SystemTray.getSystemTray();
 
 			Image image = Toolkit.getDefaultToolkit()
-					.getImage(getClass().getClassLoader().getResource("images/blue-finger-click.png"));
+					.getImage(getClass().getClassLoader().getResource("images/alex_face_16.png"));
 
 			ActionListener actionQuit = new ActionListener() {
 				public void actionPerformed(ActionEvent e) {

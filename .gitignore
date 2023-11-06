@@ -20,3 +20,6 @@ mvnw.cmd
 
 # AlexMC specifc files to ignore
 grabs/
+
+# Mac files
+.DS_Store
