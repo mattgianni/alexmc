@@ -5,7 +5,6 @@ package org.gianni.alexmc;
 
 import java.awt.Robot;
 import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +22,7 @@ public class KillStrategy implements Strategy {
 	private int currentSwing = 0;
 	private long windex = 0l;
 	private boolean feed = true;
+	private long feedCounter = 0l;
 
 	public KillStrategy() {
 		this(4, 60000l, 1000l);
@@ -41,9 +41,10 @@ public class KillStrategy implements Strategy {
 	}
 
 	private void feed(Robot robot) {
-		if (this.feed) {
-			robot.keyPress(KeyEvent.VK_9);
-			robot.keyRelease(KeyEvent.VK_9);
+		this.feedCounter++;
+		if (this.feed && this.feedCounter % 20 == 0) {
+			// robot.keyPress(KeyEvent.VK_9);
+			// robot.keyRelease(KeyEvent.VK_9);
 			robot.mousePress(InputEvent.BUTTON3_DOWN_MASK);
 			try {
 				Thread.sleep(3000);
@@ -51,11 +52,12 @@ public class KillStrategy implements Strategy {
 				e.printStackTrace();
 			}
 			robot.mouseRelease(InputEvent.BUTTON3_DOWN_MASK);
-			int weapon = KeyEvent.VK_1 + (int) (this.windex++ % 8);
-			logger.debug("weapon = " + weapon);
-			logger.debug("windex = " + this.windex);
-			robot.keyPress(weapon);
-			robot.keyRelease(weapon);
+			// int weapon = KeyEvent.VK_1 + (int) (this.windex++ % 8);
+			// int weapon = KeyEvent.VK_1;
+			// logger.debug("weapon = " + weapon);
+			// logger.debug("windex = " + this.windex);
+			// robot.keyPress(weapon);
+			// robot.keyRelease(weapon);
 		}
 	}
 

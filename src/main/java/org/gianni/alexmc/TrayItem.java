@@ -66,6 +66,8 @@ public class TrayItem {
 						ghost.setStrategy(new KillStrategy());
 					else if (cmd == "MC5")
 						ghost.setStrategy(new KillStrategy(5));
+					else if (cmd == "Slime")
+						ghost.setStrategy(new KillStrategy(5, 6000l, 1500l));
 					else if (cmd == "Grabber")
 						ghost.setStrategy(new TestImgStrategy());
 					else if (cmd == "Off")
@@ -92,6 +94,10 @@ public class TrayItem {
 			MenuItem mc5 = new MenuItem("MC5");
 			mc5.addActionListener(actionPickStrategy);
 			popup.add(mc5);
+
+			MenuItem slime = new MenuItem("Slime");
+			slime.addActionListener(actionPickStrategy);
+			popup.add(slime);
 
 			MenuItem defaultItem = new MenuItem("AFK");
 			defaultItem.addActionListener(actionPickStrategy);
