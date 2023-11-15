@@ -7,7 +7,7 @@
 
   <groupId>org.gianni</groupId>
   <artifactId>alexmc</artifactId>
-  <version>0.0.1-snapshot</version>
+  <version>0.1.1-snapshot</version>
 
   <name>alexmc</name>
   <description>a simple minecraft auto-clicker</description>
@@ -75,6 +75,13 @@
       <version>4.11</version>
       <scope>test</scope>
     </dependency>
+
+    <dependency>
+      <groupId>com.github.kwhat</groupId>
+      <artifactId>jnativehook</artifactId>
+      <version>2.2.2</version>
+    </dependency>
+
   </dependencies>
 
   <build>
@@ -107,7 +114,7 @@
           <archive>
             <manifest>
               <addClasspath>true</addClasspath>
-              <mainClass>org.gianni.alexmc.TrayDriver</mainClass>
+              <mainClass>org.gianni.alexmc.Driver</mainClass>
             </manifest>
           </archive>
         </configuration>
@@ -162,7 +169,7 @@
                   correct Main-Class and other configurations -->
                 <transformer
                   implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>org.gianni.alexmc.TrayDriver</mainClass>
+                  <mainClass>org.gianni.alexmc.Driver</mainClass>
                 </transformer>
               </transformers>
 
@@ -170,7 +177,6 @@
           </execution>
         </executions>
       </plugin>
-
     </plugins>
   </build>
 </project>

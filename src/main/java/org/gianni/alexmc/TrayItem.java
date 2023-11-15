@@ -10,18 +10,55 @@ import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TrayItem {
+import com.github.kwhat.jnativehook.GlobalScreen;
+import com.github.kwhat.jnativehook.NativeHookException;
+import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent;
+import com.github.kwhat.jnativehook.keyboard.NativeKeyListener;
+
+public class TrayItem implements NativeKeyListener {
 
 	private static Logger logger = LoggerFactory.getLogger(TrayItem.class);
 
 	private GhostClicker ghost = null;
 	private Thread worker = null;
 
+	private Map<String, Strategy> strategies;
+
 	private TrayItem() {
+		strategies = new LinkedHashMap<String, Strategy>();
+		strategies.put("Slime", new KillStrategy(5, 6000L, 1500L));
+		strategies.put("Grabber", new TestImgStrategy());
+		strategies.put("AFK", new KeyIntervalStrategy());
+		strategies.put("AFK Space", new KeyIntervalStrategy(KeyEvent.VK_SPACE, 20000));
+		strategies.put("Off", new OffStrategy());
+	}
+
+	public void nativeKeyPressed(NativeKeyEvent e) {
+		logger.trace(
+				"nativeKeyPressed: " + NativeKeyEvent.getKeyText(e.getKeyCode()) + " [" + e.getKeyCode() + "]"
+						+ " END = " + NativeKeyEvent.VC_END);
+
+		if (e.getKeyCode() == NativeKeyEvent.VC_END) {
+			logger.debug("END key pressed");
+			ghost.toggle();
+		}
+	}
+
+	public void nativeKeyReleased(NativeKeyEvent e) {
+		// logger.debug(
+		// "nativeKeyReleased: " + NativeKeyEvent.getKeyText(e.getKeyCode()) + "[" +
+		// e.getKeyCode() + "]");
+	}
+
+	public void nativeKeyTyped(NativeKeyEvent e) {
+		// logger.debug("Key Typed: " +
+		// NativeKeyEvent.getKeyText(e.getKeyCode()));
 	}
 
 	private void init() {
@@ -36,16 +73,28 @@ public class TrayItem {
 
 			SystemTray tray = SystemTray.getSystemTray();
 
+			// get the image for the tray icon
 			Image image = Toolkit.getDefaultToolkit()
 					.getImage(getClass().getClassLoader().getResource("images/alex_face_16.png"));
 
 			ActionListener actionQuit = new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					logger.debug(e.getActionCommand() + " clicked.");
+
+					logger.debug("unregistering native hook ...");
+					try {
+						GlobalScreen.unregisterNativeHook();
+					} catch (Exception ex) {
+						logger.error("failed to unregister native hook ...");
+					}
+
+					logger.debug("killing ghost");
 					ghost.kill();
+
+					logger.debug("stopping the worker thread");
 					worker.interrupt();
 					try {
-						logger.debug("attemptign to reconnect with child thread ...");
+						logger.debug("attempting to reconnect with child thread ...");
 						worker.join(5000);
 						logger.debug("sucessfully reconnected with child thread!");
 					} catch (Exception ex) {
@@ -56,60 +105,23 @@ public class TrayItem {
 					System.exit(0);
 				}
 			};
-
-			ActionListener actionPickStrategy = new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					String cmd = e.getActionCommand();
-					logger.debug(cmd + " clicked.");
-
-					if (cmd == "MC4")
-						ghost.setStrategy(new KillStrategy());
-					else if (cmd == "MC5")
-						ghost.setStrategy(new KillStrategy(5));
-					else if (cmd == "Slime")
-						ghost.setStrategy(new KillStrategy(5, 6000l, 1500l));
-					else if (cmd == "Grabber")
-						ghost.setStrategy(new TestImgStrategy());
-					else if (cmd == "Off")
-						ghost.setStrategy(new OffStrategy());
-					else if (cmd == "AFK")
-						ghost.setStrategy(new KeyIntervalStrategy());
-					else if (cmd == "AFK Space")
-						ghost.setStrategy(new KeyIntervalStrategy(KeyEvent.VK_SPACE, 20000));
-				}
-			};
-
 			// create a popup menu
 			PopupMenu popup = new PopupMenu();
 
-			// add strategies
-			MenuItem grabber = new MenuItem("Grabber");
-			grabber.addActionListener(actionPickStrategy);
-			popup.add(grabber);
+			// add the stragegies as menu items
+			for (var entry : strategies.entrySet()) {
+				MenuItem item = new MenuItem(entry.getKey());
+				item.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						logger.debug(e.getActionCommand() + " clicked.");
+						ghost.setStrategy(entry.getValue());
+					}
+				});
+				popup.add(item);
+			}
 
-			MenuItem mc4 = new MenuItem("MC4");
-			mc4.addActionListener(actionPickStrategy);
-			popup.add(mc4);
-
-			MenuItem mc5 = new MenuItem("MC5");
-			mc5.addActionListener(actionPickStrategy);
-			popup.add(mc5);
-
-			MenuItem slime = new MenuItem("Slime");
-			slime.addActionListener(actionPickStrategy);
-			popup.add(slime);
-
-			MenuItem defaultItem = new MenuItem("AFK");
-			defaultItem.addActionListener(actionPickStrategy);
-			popup.add(defaultItem);
-
-			MenuItem afkSpace = new MenuItem("AFK Space");
-			afkSpace.addActionListener(actionPickStrategy);
-			popup.add(afkSpace);
-
-			MenuItem off = new MenuItem("Off");
-			off.addActionListener(actionPickStrategy);
-			popup.add(off);
+			// add separator
+			popup.addSeparator();
 
 			// create menu item for the default action
 			MenuItem quitItem = new MenuItem("Quit");
@@ -119,7 +131,7 @@ public class TrayItem {
 			// construct a TrayIcon
 			trayIcon = new TrayIcon(image, "Alex MC", popup);
 
-			// set the TrayIcon properties
+			// what happens when you double-click -- just quit for now
 			trayIcon.addActionListener(actionQuit);
 
 			// ...
@@ -129,7 +141,14 @@ public class TrayItem {
 			} catch (AWTException e) {
 				System.err.println(e);
 			}
-			// ...
+
+			// setup the global keyboard hook
+			try {
+				GlobalScreen.registerNativeHook();
+				GlobalScreen.addNativeKeyListener(this);
+			} catch (NativeHookException e) {
+				logger.error("failed to register native hook ...");
+			}
 
 		} else {
 			// no system tray support
@@ -140,6 +159,7 @@ public class TrayItem {
 	public static TrayItem factory() {
 		// create the TrayItem
 		TrayItem ti = new TrayItem();
+
 		ti.init();
 
 		return ti;

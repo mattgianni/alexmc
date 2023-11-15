@@ -23,6 +23,10 @@ public class OffStrategy implements Strategy {
 		logger.debug("off strategy initialized.");
 	}
 
+	public void resume() {
+		logger.debug("off strategy resumed.");
+	}
+
 	public int beat(Robot robot) {
 		beatCount++;
 		if (beatCount % 1000 == 0)

@@ -18,6 +18,7 @@ public class GhostClicker implements Runnable {
 	private Robot robot = null;
 	private boolean alive = false;
 	private Strategy strategy = null;
+	private boolean paused = true;
 
 	/*
 	 * (non-Javadoc)
@@ -35,7 +36,8 @@ public class GhostClicker implements Runnable {
 
 			try {
 				while (isAlive()) {
-					strategy.beat(robot);
+					if (!paused)
+						strategy.beat(robot);
 					Thread.sleep(beatInterval);
 				}
 			} catch (InterruptedException ex) {
@@ -51,6 +53,30 @@ public class GhostClicker implements Runnable {
 	public synchronized void setStrategy(Strategy strategy) {
 		logger.debug("setting strategy to " + strategy.getClass().getName());
 		this.strategy = strategy;
+		this.paused = true;
+	}
+
+	public synchronized void resume() {
+		logger.debug("resuming");
+		this.paused = false;
+		this.strategy.resume();
+	}
+
+	public synchronized void pause() {
+		logger.debug("pausing");
+		this.paused = true;
+	}
+
+	public synchronized boolean isPaused() {
+		return paused;
+	}
+
+	public synchronized void toggle() {
+		logger.debug("toggling");
+		if (paused)
+			resume();
+		else
+			pause();
 	}
 
 	public synchronized boolean isAlive() {
