@@ -21,7 +21,7 @@ public class TestImgStrategy implements Strategy {
 	private static Logger logger = LoggerFactory.getLogger(TestImgStrategy.class);
 
 	private long interval;
-	private long last = -1l;
+	private long last = System.currentTimeMillis();
 	private int count = 0;
 
 	public TestImgStrategy() {
@@ -30,6 +30,10 @@ public class TestImgStrategy implements Strategy {
 
 	public TestImgStrategy(long interval) {
 		this.interval = interval;
+		this.last = System.currentTimeMillis();
+	}
+
+	public void resume() {
 		this.last = System.currentTimeMillis();
 	}
 

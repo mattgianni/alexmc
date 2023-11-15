@@ -19,7 +19,7 @@ public class KeyIntervalStrategy implements Strategy {
 
 	private int key;
 	private long interval;
-	private long last = -1l;
+	private long last = System.currentTimeMillis();
 
 	public KeyIntervalStrategy() {
 		this(KeyEvent.VK_ALT, 5000);
@@ -29,6 +29,10 @@ public class KeyIntervalStrategy implements Strategy {
 		logger.debug("creating KeyIntervalStrategy (" + key + ", " + interval + ")");
 		this.key = key;
 		this.interval = interval;
+		this.last = System.currentTimeMillis();
+	}
+
+	public void resume() {
 		this.last = System.currentTimeMillis();
 	}
 

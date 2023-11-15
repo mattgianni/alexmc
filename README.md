@@ -17,7 +17,7 @@ mvn clean package
 Then, run the jar file:
 
 ```bash
-javaw -jar target/alexmc-0.0.1-snapshot.jar
+javaw -jar target/alexmc-0.1.1-snapshot.jar
 ```
 
 If you want to see the console output, run the jar file using `java` instead of `javaw`.

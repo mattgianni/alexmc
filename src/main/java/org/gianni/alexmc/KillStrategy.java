@@ -18,9 +18,8 @@ public class KillStrategy implements Strategy {
 	private int swings;
 	private long swingGap;
 	private long interval;
-	private long last = -1l;
+	private long last = System.currentTimeMillis();
 	private int currentSwing = 0;
-	private long windex = 0l;
 	private boolean feed = true;
 	private long feedCounter = 0l;
 
@@ -40,11 +39,16 @@ public class KillStrategy implements Strategy {
 		this.last = System.currentTimeMillis();
 	}
 
+	public void resume() {
+		last = System.currentTimeMillis();
+		feedCounter = 0l;
+		currentSwing = 0;
+	}
+
 	private void feed(Robot robot) {
 		this.feedCounter++;
 		if (this.feed && this.feedCounter % 20 == 0) {
-			// robot.keyPress(KeyEvent.VK_9);
-			// robot.keyRelease(KeyEvent.VK_9);
+			logger.debug("feed counter exceeded, time to eat");
 			robot.mousePress(InputEvent.BUTTON3_DOWN_MASK);
 			try {
 				Thread.sleep(3000);
@@ -52,12 +56,7 @@ public class KillStrategy implements Strategy {
 				e.printStackTrace();
 			}
 			robot.mouseRelease(InputEvent.BUTTON3_DOWN_MASK);
-			// int weapon = KeyEvent.VK_1 + (int) (this.windex++ % 8);
-			// int weapon = KeyEvent.VK_1;
-			// logger.debug("weapon = " + weapon);
-			// logger.debug("windex = " + this.windex);
-			// robot.keyPress(weapon);
-			// robot.keyRelease(weapon);
+			logger.debug("finished eating");
 		}
 	}
 
@@ -71,9 +70,10 @@ public class KillStrategy implements Strategy {
 			robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
 			robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
 			if (currentSwing == swings) {
+				logger.debug("done with this cycle of swings");
 				this.currentSwing = 0;
-				this.last = System.currentTimeMillis();
 				this.feed(robot);
+				this.last = System.currentTimeMillis();
 			}
 		}
 
